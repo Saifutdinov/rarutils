@@ -5,97 +5,101 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Saifutdinov/utils"
+	"github.com/Saifutdinov/rarutils/cmd"
 )
 
-type (
-	Archive struct {
-		// how to name file. No ".rar" needed in the end.
-		Name string
-		// where save file
-		DestinationDir string
+// Sets source directory to compress
+func (a *Archive) SetSourceDir(dir string) {
+	a.SourceDir = dir
+}
 
-		// save as solid
-		Solid bool
+// Sets pattern of file to compress
+func (a *Archive) SetFilePattern(pattern string) {
+	a.FilePattern = pattern
+}
 
-		//Directory of files. Example - /path/to/directory
-		SourceDir string
-		//File pattern of files. Example - /path/to/files/*.pdf
-		FilePattern string
-		// List of file paths. Example - [/path/to/file1.pdf, /path/to/file2.pdf, /path/to/file3.pdf, ...]
-		Files []string
-
-		// Compression. Example - m0 - m5. Default empty.
-		Compression string
-
-		// Volumes. Example - v10MB. Default empty.
-		Volumes string
-
-		// Password
-		Password string
+// Add file path to compress
+func (a *Archive) AddFile(path string) {
+	if a.Files == nil {
+		a.Files = make([]string, 0)
 	}
-)
+	a.Files = append(a.Files, path)
+}
 
-const (
-	NoCompression   = ""
-	CompressionLVL0 = "m0"
-	CompressionLVL1 = "m1"
-	CompressionLVL2 = "m2"
-	CompressionLVL3 = "m3"
-	CompressionLVL4 = "m4"
-	CompressionLVL5 = "m5"
-)
+// Sets compression level
+func (a *Archive) SetCompression(lvl int) {
+	a.Compression = CompressionLevel(lvl)
+}
 
-const (
-	RarExeFile        = "/usr/local/bin/rar"
-	FilesListFileName = "rarfileslist*"
-)
+// Sets volumes sizes
+func (a *Archive) SetVolumes(vol string) {
+	a.Volumes = vol
+}
 
-// Store your rar file to path
-func (a Archive) Save() {
-	a.savefile()
+// Sets password for archive
+func (a *Archive) SetPassord(password string) {
+	a.Password = password
+}
+
+// Toggles solid flag to make is solid or not. Default - false
+func (a *Archive) ToggleSolid(solid bool) {
+	a.Solid = solid
+}
+
+// Compress your source to rar file to path
+func (a *Archive) Compress() error {
+	return a.savefile()
 }
 
 // Creates file with params, returns you []byte to force download or send by email
 // and then removes file from path (you need just []byte)
-func (a Archive) Stream(keepAfterReturn bool) []byte {
+func (a *Archive) Stream(keepAfterReturn bool) []byte {
 	a.savefile()
 	file, _ := os.ReadFile(a.filename())
-
 	if !keepAfterReturn {
 		os.Remove(a.filename())
 	}
 	return file
 }
 
-func (a Archive) filename() string {
+// Returns concatinated destination direactory and file name.
+// If file name is empty, return "./" as current directory.
+func (a *Archive) filename() string {
 	if a.DestinationDir == "" {
 		a.DestinationDir = "."
 	}
 	return fmt.Sprintf("%s/%s.rar", a.DestinationDir, a.Name)
 }
 
-func (a Archive) buildargs() (args []string, tempfile string) {
+// Builds and returns arguments to call rar utility.
+// Also returns temp file for source, to use and delete after that.
+func (a *Archive) buildargs() (args []string, tempfile string, err error) {
 	args = append(args, "a", a.filename())
 	if a.Solid {
 		args = append(args, "-s")
 	}
-	if a.Compression != "" {
-		args = append(args, a.Compression)
+
+	if a.Compression != CompressionLVL3 {
+		args = append(args, fmt.Sprintf("-m%d", a.Compression))
 	}
+
 	if a.Volumes != "" {
 		args = append(args, "-v"+a.Volumes)
 	}
-	source, tempfile := a.source()
+	source, tempfile, err := a.source()
+	if err != nil {
+		return
+	}
 	args = append(args, source...)
-
 	if a.Password != "" {
 		args = append(args, "-p"+a.Password)
 	}
 	return
 }
 
-func (a Archive) source() (source []string, tempfile string) {
+// Returns source of files for utility call.
+// Alse creates and returns temp file fileslist*.txt to store multiple files.
+func (a *Archive) source() (source []string, tempfile string, err error) {
 	if a.SourceDir != "" {
 		source = append(source, "-r", a.SourceDir)
 		return
@@ -104,26 +108,38 @@ func (a Archive) source() (source []string, tempfile string) {
 		source = append(source, a.FilePattern)
 	}
 
-	tempfile = createFilesList(a.Files)
+	tempfile, err = createFilesList(a.Files)
+	if err != nil {
+		return
+	}
 	source = append(source, "@"+tempfile)
 	return
 }
 
-// executes command to create rar archive file
-func (a Archive) savefile() {
-	args, tempfile := a.buildargs()
-	utils.CMD(RarExeFile, args)
-
+// Executes command to create rar archive file
+func (a *Archive) savefile() error {
+	args, tempfile, err := a.buildargs()
+	if err != nil {
+		return err
+	}
+	_, err = cmd.Call(RarExeFile, args)
+	if err != nil {
+		return err
+	}
 	if tempfile != "" {
 		os.RemoveAll(tempfile)
 	}
+	return nil
 }
 
-// creates tmp file to save as argument "@fileslist.txt" to create archive file
-func createFilesList(fs []string) string {
-	tempFile, _ := os.CreateTemp("", FilesListFileName)
+// Creates tmp file to save as argument "@fileslist.txt" to create archive file
+func createFilesList(fs []string) (string, error) {
+	tempFile, err := os.CreateTemp("", FilesListFileName)
+	if err != nil {
+		return "", err
+	}
 	defer tempFile.Close()
 	fileslist := strings.Join(fs, "\n")
 	tempFile.WriteString(fileslist)
-	return tempFile.Name()
+	return tempFile.Name(), nil
 }

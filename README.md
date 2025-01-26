@@ -1,28 +1,101 @@
-# 📦 RARUtils Package
+# 📦 RARUtils — Go Package for RAR/UnRAR Operations
 
-A lightweight Go package for compressing and extracting files using the powerful `rar` utility! 🎯 Whether you're building automated workflows or managing archives, this package provides a simple interface to interact with `rar` on your system.
+A powerful Go package to handle `.rar` archives with the help of the `rar` and `unrar` utilities. This library allows you to create and extract RAR archives efficiently, as well as interact with their contents programmatically.
 
 ---
 
 ## 🚀 Features
 
-- 📂 **Create RAR Archives**: Compress files and directories with adjustable compression levels.
-- 🔓 **Extract Files**: Unpack files from RAR archives effortlessly.
-- 🧾 **List Files**: Retrieve a list of files inside a RAR archive for further processing.
-- ⚙️ **Customizable Commands**: Fine-tune the RAR options for your specific needs.
+- 📁 **Create RAR archives** with specified compression parameters.
+- 🗂️ **Extract RAR archives** and access file information programmatically.
+- 🛠️ Support for listing archive contents (`unrar l` and `unrar lt`).
+- 🔄 **Cross-platform compatibility** (with installed `rar`/`unrar` utilities).
+- ✅ Fully customizable via exported configuration.
 
 ---
 
-## 📜 Requirements
+## 📋 Prerequisites
 
-1. **RAR Utility**: Ensure `rar` is installed and available in your system's PATH. You can download it from the [official RARLAB website](https://www.rarlab.com/).
-2. **Go Installed**: This package is compatible with Go 1.18+.
-
----
-
-## 💻 Installation
-
-To get started, simply install the package:
+Before using the package, ensure the `rar` and `unrar` utilities are installed on your system.  
+You can check their availability by running:
 
 ```bash
+rar --version
+unrar --version
+```
+
+
+---
+
+## 📦 Installation of the Package
+```bash
 go get github.com/Saifutdinov/rarutils
+```
+---
+
+## 📖 Usage
+### 1. Basic Example: Archiving Files
+```golang
+	err := rar.ArchiveFiles("my_archive.rar", []string{"file1.txt", "file2.txt"})
+	if err != nil {
+		log.Fatalf("Failed to create archive: %v", err)
+	}
+	log.Println("Archive created successfully!")
+```
+### 2. Extracting Files
+```golang
+archive, err := rar.OpenArchive("my_archive.rar")
+if err != nil {
+	log.Fatalf("Failed to open archive: %v", err)
+}
+defer archive.Close()
+
+files, err := archive.Extract()
+if err != nil {
+	log.Fatalf("Failed to extract archive: %v", err)
+}
+
+
+```
+### 3. Listing Archive Contents
+```golang
+files, err := rar.ListArchiveContents("my_archive.rar")
+if err != nil {
+	log.Fatalf("Failed to list archive contents: %v", err)
+}
+
+for _, file := range files {
+	log.Printf("File: %s, Size: %d bytes", file.Name, file.Size)
+}
+```
+## 🛠️ Configuration
+
+The package allows customization of the following parameters through exported configuration functions:
+
+- Compression Levels: Control the RAR compression using parameters like `-m5` (maximum compression).
+    ```golang
+    archive.SetCompression(rar.CompressionLVL)
+    ```
+- Custom Command Paths: If `rar` or `unrar` is not in your PATH, you can specify the binary location.
+    ```golang
+    rar.SetRarPath("/custom/path/to/rar")
+    rar.SetUnrarPath("/custom/path/to/unrar")
+    ```
+---
+## ⚖️ License
+
+> ❗ Important:
+This package is a wrapper around the `rar` and `unrar` utilities, which are proprietary software by Alexander Roshal.
+While this package is MIT-licensed, ensure compliance with the licensing terms of the RAR utilities when redistributing or deploying.
+
+---
+## 💬 Contributing
+
+Contributions are welcome! Feel free to open an issue or submit a pull request.
+
+---
+## 🌟 Acknowledgements
+
+Special thanks to the developers of rar and unrar utilities for their amazing tools!
+
+---

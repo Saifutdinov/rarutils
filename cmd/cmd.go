@@ -1,4 +1,4 @@
-package utils
+package cmd
 
 import (
 	"bytes"
@@ -6,7 +6,8 @@ import (
 	"os/exec"
 )
 
-func CheckBinary(binary string) error {
+// Checks is binary of `rar` or `unrar` exists and executable
+func Check(binary string) error {
 	_, err := exec.LookPath(binary)
 	if err != nil {
 		return fmt.Errorf("binary %s not found or not executable", binary)
@@ -14,7 +15,7 @@ func CheckBinary(binary string) error {
 	return nil
 }
 
-func CMD(utility string, args []string) (string, error) {
+func Call(utility string, args []string) (string, error) {
 	var stdout, stderr bytes.Buffer
 
 	cmd := exec.Command(utility, args...)

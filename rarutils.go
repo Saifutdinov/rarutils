@@ -1,21 +1,22 @@
-package rarutils
+package main
 
-import "github.com/Saifutdinov/rarutils/rar"
+import (
+	"fmt"
 
-func main() {
+	"github.com/Saifutdinov/rarutils/cmd"
+	"github.com/Saifutdinov/rarutils/rar"
+	"github.com/Saifutdinov/rarutils/unrar"
+)
 
-	var (
-		fileName    = "allfiles"
-		source      = "./files"
-		destination = "./archives"
-	)
-
-	archive := rar.Archive{
-		Name:           fileName,
-		SourceDir:      source,
-		DestinationDir: destination,
+func init() {
+	// Checking is rar utility exists and can be executed
+	if err := cmd.Check(rar.RarExeFile); err != nil {
+		fmt.Printf("Cannot run `rar`: %v \n", err)
 	}
-
-	archive.Save()
-
+	// Checking is unrar utility exists and can be executed
+	if err := cmd.Check(unrar.UnrarExeFile); err != nil {
+		fmt.Printf("Cannot run `unrar`: %v \n", err)
+	}
 }
+
+func main() {}
