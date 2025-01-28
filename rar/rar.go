@@ -36,11 +36,7 @@ const (
 	// maximal
 	CompressionLVL5
 
-	FilesListFileName = "rarfileslist*"
-)
-
-var (
-	RarExeFile = "/usr/local/bin/rar"
+	filesListFileName = "rarfileslist*"
 )
 
 // Returns new Archive struct with name. Name should be without ".rar" extension
@@ -48,9 +44,4 @@ func NewArchive(name string) *Archive {
 	return &Archive{
 		Name: name,
 	}
-}
-
-// Sets path to executable file
-func SetEXEPath(path string) {
-	RarExeFile = path
 }

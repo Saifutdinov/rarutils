@@ -1,7 +1,5 @@
 package unrar
 
-import "os"
-
 type (
 	Archive struct {
 		Name       string
@@ -10,12 +8,6 @@ type (
 
 		NotOverwrite bool
 		Destination  string
-
-		NotClear bool
-
-		Files []*os.File
-
-		ExeFilePath string
 	}
 
 	Fileinfo struct {
@@ -29,10 +21,8 @@ const (
 	ActionList    = "l"
 )
 
-var (
-	UnrarExeFile = "/usr/local/bin/unrar"
-)
-
-func SetEXEPath(path string) {
-	UnrarExeFile = path
+func NewArchive(path string) *Archive {
+	return &Archive{
+		SourceFile: path,
+	}
 }

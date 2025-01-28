@@ -5,12 +5,18 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Saifutdinov/rarutils"
 	"github.com/Saifutdinov/rarutils/cmd"
 )
 
 // Sets source directory to compress
 func (a *Archive) SetSourceDir(dir string) {
 	a.SourceDir = dir
+}
+
+// Sets destination directory to store archive
+func (a *Archive) SetDestinationDir(dir string) {
+	a.DestinationDir = dir
 }
 
 // Sets pattern of file to compress
@@ -27,7 +33,7 @@ func (a *Archive) AddFile(path string) {
 }
 
 // Sets compression level
-func (a *Archive) SetCompression(lvl int) {
+func (a *Archive) SetCompression(lvl CompressionLevel) {
 	a.Compression = CompressionLevel(lvl)
 }
 
@@ -53,13 +59,16 @@ func (a *Archive) Compress() error {
 
 // Creates file with params, returns you []byte to force download or send by email
 // and then removes file from path (you need just []byte)
-func (a *Archive) Stream(keepAfterReturn bool) []byte {
+func (a *Archive) Stream(keepAfterReturn bool) ([]byte, error) {
 	a.savefile()
-	file, _ := os.ReadFile(a.filename())
+	file, err := os.ReadFile(a.filename())
+	if err != nil {
+		return nil, err
+	}
 	if !keepAfterReturn {
 		os.Remove(a.filename())
 	}
-	return file
+	return file, nil
 }
 
 // Returns concatinated destination direactory and file name.
@@ -122,7 +131,8 @@ func (a *Archive) savefile() error {
 	if err != nil {
 		return err
 	}
-	_, err = cmd.Call(RarExeFile, args)
+
+	_, err = cmd.Call(rarutils.RarExeDefaultPath, args)
 	if err != nil {
 		return err
 	}
@@ -134,7 +144,7 @@ func (a *Archive) savefile() error {
 
 // Creates tmp file to save as argument "@fileslist.txt" to create archive file
 func createFilesList(fs []string) (string, error) {
-	tempFile, err := os.CreateTemp("", FilesListFileName)
+	tempFile, err := os.CreateTemp("", filesListFileName)
 	if err != nil {
 		return "", err
 	}
