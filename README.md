@@ -93,20 +93,20 @@ Make archive solid and compress it better. `-s`
 ```golang
 archive.ToggleSolid(true)
 ```
+---
 
 #### Files
 You can set up any type of files source 
 ```golang
 archive.SetSourceDir("/path/to/directory")
-
 archive.SetFilePattern("file*.pdf")
-
 // creates @fileslist temp file and use it as list
 archive.AddFile("/path/to/file1.pdf")
 ```
 ---
 
 #### Stream (WIP)
+
 Retuns you stream of file
 
 ```golang
@@ -115,6 +115,7 @@ if err != nil {
 	return
 }
 ```
+---
 
 ## UNRAR
 
@@ -123,44 +124,43 @@ if err != nil {
 #### 1. Extracting Files
 ```golang
 archive := unrar.NewArchive("/path/to/archive.rar")
-
 // unrar x /path/to/archive.rar ./
 files, err := archive.Extract()
 if err != nil {
 	fmt.Printf("Failed to extract archive: %v", err)
 	return
 }
-
 fmt.Println("Archive extracted successfully!")
 ```
+---
 
---
 #### 2. Listing Archive Contents
 ```golang
 archive := unrar.NewArchive("/path/to/archive.rar")
-
 // unrar laadesw  /path/to/archive.rar
 files, err := archive.List()
 if err != nil {
 	fmt.Printf("Failed list archive files: %v\n", err)
 }
-
 for _, file := range files {
 	fmt.Printf("File: %s, Size: %d bytes", file.Name, file.Size)
 }
 ```
---
+---
+
 ### Methods
 
 ####  Destination
+
 Specify extraction path to store your files locally
 
 ```golang
 archive.SetDestination("/path/to/extract")
 ```
-
 ---
+
 ####  Password
+
 Use password to extract files from archive. `-p{secretpassword}`
 
 ```golang
@@ -169,6 +169,7 @@ archive.SetPassword("secretpassword")
 ---
 
 ####  Overwrite mode
+
 If you need to overwrite (or don't) you can toggle overwrite mode. `-o-` or `-o+`.
  
 ```golang
@@ -183,11 +184,13 @@ archive.SetOverwriteMode(true)
 > While this package is MIT-licensed, ensure compliance with the licensing terms of the RAR utilities when redistributing or deploying.
 
 ---
+
 ## 💬 Contributing
 
 Contributions are welcome! Feel free to open an issue or submit a pull request.
 
 ---
+
 ## 🌟 Acknowledgements
 
 Special thanks to the developers of `rar` and `unrar` utilities for their amazing tools!
