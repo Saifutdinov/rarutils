@@ -5,23 +5,23 @@ type (
 
 	Archive struct {
 		// how to name file. No ".rar" needed in the end.
-		Name string
+		name string
 		// where save file
-		DestinationDir string
+		destinationDir string
 		// save as solid
-		Solid bool
+		solid bool
 		//Directory of files. Example - /path/to/directory
-		SourceDir string
+		sourceDir string
 		//File pattern of files. Example - /path/to/files/*.pdf
-		FilePattern string
+		filePattern string
 		// List of file paths. Example - [/path/to/file1.pdf, /path/to/file2.pdf, /path/to/file3.pdf, ...]
-		Files []string
-		// Compression. Example - m0 - m5. Default empty.
-		Compression CompressionLevel
-		// Volumes. Example - v10MB. Default empty.
-		Volumes string
-		// Password
-		Password string
+		files []string
+		// compression. Example - m0 - m5. Default empty.
+		compression CompressionLevel
+		// volumes. Example - v10MB. Default empty.
+		volumes string
+		// password
+		password string
 	}
 )
 
@@ -42,6 +42,6 @@ const (
 // Returns new Archive struct with name. Name should be without ".rar" extension
 func NewArchive(name string) *Archive {
 	return &Archive{
-		Name: name,
+		name: name,
 	}
 }

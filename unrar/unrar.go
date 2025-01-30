@@ -2,27 +2,33 @@ package unrar
 
 type (
 	Archive struct {
-		Name       string
-		SourceFile string
-		Password   string
+		// Path to file with file name /path/to/file.rar.
+		sourceFile string
+		// Password to extract protected archive.
+		password string
 
-		NotOverwrite bool
-		Destination  string
+		// Overwrite extracted files. False by default.
+		notOverwrite bool
+
+		// Path to extract files, default ./{file name}_extracted_{time.Now().Nanoseconds()}
+		destination string
 	}
 
 	Fileinfo struct {
+		// parsed file name
 		Name string
+		// parsed file size
 		Size int64
 	}
 )
 
 const (
-	ActionExtract = "x"
-	ActionList    = "l"
+	actionExtract = "x"
+	actionList    = "l"
 )
 
 func NewArchive(path string) *Archive {
 	return &Archive{
-		SourceFile: path,
+		sourceFile: path,
 	}
 }

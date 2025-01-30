@@ -2,7 +2,6 @@ package unrar
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -12,57 +11,54 @@ import (
 	"github.com/Saifutdinov/rarutils/utils"
 )
 
+// Sets password to extract archive. "-pMyPassword".
 func (a *Archive) SetPassword(password string) {
-	a.Password = password
+	a.password = password
 }
 
+// Sets overwrite mod to extract archive. "-o-" or "-o+".
 func (a *Archive) SetOverwriteMode(overwrite bool) {
-	a.NotOverwrite = !overwrite
+	a.notOverwrite = !overwrite
 }
 
+// Sets destination directory to extract, default "./".
 func (a *Archive) SetDestination(destdir string) {
-	a.Destination = destdir
+	a.destination = destdir
 }
 
+// Extracts and return files list
 func (a *Archive) Extract() ([]Fileinfo, error) {
 	return a.extract()
 }
 
+// Lists archive files list
 func (a *Archive) List() ([]Fileinfo, error) {
 	return a.list()
 }
 
-func (a *Archive) Stream(keepAfterReturn bool) {
-	a.extract()
-
-	if !keepAfterReturn {
-		os.RemoveAll(a.Destination)
-	}
-}
-
 func (a *Archive) buildargs(action string) (args []string) {
 	args = append(args, action)
-	if a.Password != "" {
-		args = append(args, "-p"+a.Password)
+	if a.password != "" {
+		args = append(args, "-p"+a.password)
 	}
-	args = append(args, a.SourceFile)
-	if action == ActionExtract {
+	args = append(args, a.sourceFile)
+	if action == actionExtract {
 
-		if !a.NotOverwrite {
-			args = append(args, utils.Switch(a.NotOverwrite, "-o-", "-o+"))
+		if !a.notOverwrite {
+			args = append(args, utils.Switch(a.notOverwrite, "-o-", "-o+"))
 		}
 
-		if a.Destination == "" {
+		if a.destination == "" {
 			a.setTempPath()
 		}
-		args = append(args, a.Destination)
+		args = append(args, a.destination)
 	}
 	return
 }
 
 // Should I read file info from storage, or I can use unrar l?
 func (a *Archive) extract() ([]Fileinfo, error) {
-	args := a.buildargs(ActionExtract)
+	args := a.buildargs(actionExtract)
 	_, err := commandline.Call(rarutils.UnrarExeDefaultPath, args)
 	if err != nil {
 		return nil, err
@@ -71,14 +67,19 @@ func (a *Archive) extract() ([]Fileinfo, error) {
 }
 
 func (a *Archive) list() ([]Fileinfo, error) {
-	args := a.buildargs(ActionList)
+	args := a.buildargs(actionList)
 	output, err := commandline.Call(rarutils.UnrarExeDefaultPath, args)
 	return parsefiles(output), err
 }
 
 func (a *Archive) setTempPath() string {
-	a.Destination = fmt.Sprintf("./%s_extracted_%d", a.SourceFile, time.Now().Nanosecond())
-	return a.Destination
+	a.destination = fmt.Sprintf("./%s_extracted_%d", a.fname(), time.Now().Nanosecond())
+	return a.destination
+}
+
+func (a *Archive) fname() string {
+	parts := strings.Split(a.sourceFile, "/")
+	return parts[len(parts)-1]
 }
 
 // func readfiles(destdir string) ([]Fileinfo, error) {

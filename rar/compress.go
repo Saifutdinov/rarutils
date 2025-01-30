@@ -11,45 +11,45 @@ import (
 
 // Sets source directory to compress
 func (a *Archive) SetSourceDir(dir string) {
-	a.SourceDir = dir
+	a.sourceDir = dir
 }
 
 // Sets destination directory to store archive
 func (a *Archive) SetDestinationDir(dir string) {
-	a.DestinationDir = dir
+	a.destinationDir = dir
 }
 
 // Sets pattern of file to compress
 func (a *Archive) SetFilePattern(pattern string) {
-	a.FilePattern = pattern
+	a.filePattern = pattern
 }
 
 // Add file path to compress
 func (a *Archive) AddFile(path string) {
-	if a.Files == nil {
-		a.Files = make([]string, 0)
+	if a.files == nil {
+		a.files = make([]string, 0)
 	}
-	a.Files = append(a.Files, path)
+	a.files = append(a.files, path)
 }
 
 // Sets compression level
 func (a *Archive) SetCompression(lvl CompressionLevel) {
-	a.Compression = CompressionLevel(lvl)
+	a.compression = CompressionLevel(lvl)
 }
 
 // Sets volumes sizes
 func (a *Archive) SetVolumes(vol string) {
-	a.Volumes = vol
+	a.volumes = vol
 }
 
 // Sets password for archive
 func (a *Archive) SetPassord(password string) {
-	a.Password = password
+	a.password = password
 }
 
 // Toggles solid flag to make is solid or not. Default - false
 func (a *Archive) ToggleSolid(solid bool) {
-	a.Solid = solid
+	a.solid = solid
 }
 
 // Compress your source to rar file to path
@@ -74,34 +74,34 @@ func (a *Archive) Stream(keepAfterReturn bool) ([]byte, error) {
 // Returns concatinated destination direactory and file name.
 // If file name is empty, return "./" as current directory.
 func (a *Archive) filename() string {
-	if a.DestinationDir == "" {
-		a.DestinationDir = "."
+	if a.destinationDir == "" {
+		a.destinationDir = "."
 	}
-	return fmt.Sprintf("%s/%s.rar", a.DestinationDir, a.Name)
+	return fmt.Sprintf("%s/%s.rar", a.destinationDir, a.name)
 }
 
 // Builds and returns arguments to call rar utility.
 // Also returns temp file for source, to use and delete after that.
 func (a *Archive) buildargs() (args []string, tempfile string, err error) {
 	args = append(args, "a", a.filename())
-	if a.Solid {
+	if a.solid {
 		args = append(args, "-s")
 	}
 
-	if a.Compression != CompressionLVL3 {
-		args = append(args, fmt.Sprintf("-m%d", a.Compression))
+	if a.compression != CompressionLVL3 {
+		args = append(args, fmt.Sprintf("-m%d", a.compression))
 	}
 
-	if a.Volumes != "" {
-		args = append(args, "-v"+a.Volumes)
+	if a.volumes != "" {
+		args = append(args, "-v"+a.volumes)
 	}
 	source, tempfile, err := a.source()
 	if err != nil {
 		return
 	}
 	args = append(args, source...)
-	if a.Password != "" {
-		args = append(args, "-p"+a.Password)
+	if a.password != "" {
+		args = append(args, "-p"+a.password)
 	}
 	return
 }
@@ -109,15 +109,15 @@ func (a *Archive) buildargs() (args []string, tempfile string, err error) {
 // Returns source of files for utility call.
 // Alse creates and returns temp file fileslist*.txt to store multiple files.
 func (a *Archive) source() (source []string, tempfile string, err error) {
-	if a.SourceDir != "" {
-		source = append(source, "-r", a.SourceDir)
+	if a.sourceDir != "" {
+		source = append(source, "-r", a.sourceDir)
 		return
 	}
-	if a.FilePattern != "" {
-		source = append(source, a.FilePattern)
+	if a.filePattern != "" {
+		source = append(source, a.filePattern)
 	}
 
-	tempfile, err = createFilesList(a.Files)
+	tempfile, err = createFilesList(a.files)
 	if err != nil {
 		return
 	}
