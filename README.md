@@ -24,7 +24,6 @@ rar --version
 unrar --version
 ```
 
-
 ---
 
 ## 📦 Installation of the Package
@@ -54,12 +53,14 @@ if err != nil {
 }
 fmt.Println("Archive created successfully!")
 ```
+---
 
 ### Methods
 
 The package allows customization of the following parameters through exported configuration functions:
 
 #### Compression
+
 Control the RAR compression using parameters like `-m5` (maximum compression).
 
 ```golang
@@ -68,16 +69,30 @@ archive.SetCompression(rar.CompressionLVL5)
 ---
 
 #### Volumes
+
+Split archive to selected size volumes. Will run as `-v10MB`
+
 ```golang
 archive.SetVolumes("10MB")
 ```
 ---
 
 #### Password
+
+Protect your files by setting password. `-p secretpassword`
+
 ```golang
 archive.SetPassord("secretpassword")
 ```
 ---
+
+#### Solid archive
+
+Make archive solid and compress it better. `-s`
+
+```golang
+archive.ToggleSolid(true)
+```
 
 #### Files
 You can set up any type of files source 
@@ -86,12 +101,14 @@ archive.SetSourceDir("/path/to/directory")
 
 archive.SetFilePattern("file*.pdf")
 
+// creates @fileslist temp file and use it as list
 archive.AddFile("/path/to/file1.pdf")
 ```
 ---
 
 #### Stream (WIP)
 Retuns you stream of file
+
 ```golang
 stream, err := archive.Stream()
 if err != nil {
@@ -132,13 +149,32 @@ for _, file := range files {
 	fmt.Printf("File: %s, Size: %d bytes", file.Name, file.Size)
 }
 ```
-
+--
 ### Methods
 
-#### 
+####  Destination
+Specify extraction path to store your files locally
+
 ```golang
 archive.SetDestination("/path/to/extract")
 ```
+
+---
+####  Password
+Use password to extract files from archive. `-p{secretpassword}`
+
+```golang
+archive.SetPassword("secretpassword")
+```
+---
+
+####  Overwrite mode
+If you need to overwrite (or don't) you can toggle overwrite mode. `-o-` or `-o+`.
+ 
+```golang
+archive.SetOverwriteMode(true)
+```
+---
 
 ## ⚖️ License
 
