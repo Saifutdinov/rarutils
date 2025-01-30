@@ -38,12 +38,11 @@ func (a *Archive) List() ([]Fileinfo, error) {
 
 func (a *Archive) buildargs(action string) (args []string) {
 	args = append(args, action)
+	args = append(args, a.sourceFile)
 	if a.password != "" {
 		args = append(args, "-p"+a.password)
 	}
-	args = append(args, a.sourceFile)
 	if action == actionExtract {
-
 		if !a.notOverwrite {
 			args = append(args, utils.Switch(a.notOverwrite, "-o-", "-o+"))
 		}
@@ -73,7 +72,7 @@ func (a *Archive) list() ([]Fileinfo, error) {
 }
 
 func (a *Archive) setTempPath() string {
-	a.destination = fmt.Sprintf("./%s_extracted_%d", a.fname(), time.Now().Nanosecond())
+	a.destination = fmt.Sprintf("%s_extracted_%d", a.fname(), time.Now().Nanosecond())
 	return a.destination
 }
 
@@ -93,10 +92,14 @@ func (a *Archive) fname() string {
 func parsefiles(output string) (files []Fileinfo) {
 	lines := strings.Split(output, "\n")
 	filesline := 0
+
 	for i, line := range lines {
 		parts := strings.Fields(line)
 		if len(parts) == 0 {
 			continue
+		}
+		if filesline > 0 && parts[0] == "-----------" && i > filesline {
+			break
 		}
 		if parts[0] == "Attributes" {
 			filesline = i + 1
@@ -107,9 +110,7 @@ func parsefiles(output string) (files []Fileinfo) {
 				Size: parseSize(parts[1]),
 			})
 		}
-		if filesline > 0 && parts[0] == "-----------" && i > filesline {
-			break
-		}
+
 	}
 
 	return files

@@ -15,21 +15,12 @@ var (
 func init() {
 	// Checking is rar utility exists and can be executed
 	if err := cmd.Check(RarExeDefaultPath); err != nil {
-		fmt.Printf("Cannot run `rar`: %v \n", err)
+		fmt.Printf("Be careful! %v \n", err)
 	}
 	// Checking is unrar utility exists and can be executed
 	if err := cmd.Check(UnrarExeDefaultPath); err != nil {
-		fmt.Printf("Cannot run `unrar`: %v \n", err)
+		fmt.Printf("Be careful! %v \n", err)
 	}
-
-	// archive := unrar.NewArchive("path")
-
-	// archive.SetDestination("/path/to/extract")
-	// // -o+ / -o-
-	// archive.SetOverwriteMode(true)
-	// // -pMySecretPassword
-	// archive.SetPassword("MySecretPassword")
-
 }
 
 // Sets `rar` exe file if not located in default path
@@ -38,6 +29,6 @@ func SetRarPath(path string) {
 }
 
 // Sets `unrar` exe file if not located in default path
-func SetUnarPath(path string) {
+func SetUnrarPath(path string) {
 	UnrarExeDefaultPath = path
 }
