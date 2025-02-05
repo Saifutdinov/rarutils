@@ -59,9 +59,11 @@ func (a *Archive) Compress() error {
 
 // Creates file with params, returns you []byte to force download or send by email
 // and then removes file from path (you need just []byte)
-func (a *Archive) Stream(keepAfterReturn bool) ([]byte, error) {
-	a.savefile()
-	file, err := os.ReadFile(a.filename())
+func (a *Archive) Stream(keepAfterReturn bool) (*os.File, error) {
+	if err := a.savefile(); err != nil {
+		return nil, err
+	}
+	file, err := os.Open(a.filename())
 	if err != nil {
 		return nil, err
 	}
