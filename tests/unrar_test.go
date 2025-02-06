@@ -32,7 +32,7 @@ func TestExtract(t *testing.T) {
 
 	rarutils.SetRarPath("/opt/homebrew/bin/rar")
 
-	rarArchive := rar.NewArchive(tempArchivefileName)
+	rarArchive := rar.NewArchive()
 
 	rarArchive.AddFile(tempfile1.Name())
 	rarArchive.AddFile(tempfile2.Name())

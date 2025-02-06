@@ -30,7 +30,7 @@ func TestCompress(t *testing.T) {
 
 	rarutils.SetRarPath("/opt/homebrew/bin/rar")
 
-	archive := rar.NewArchive(tempArchivefileName)
+	archive := rar.NewArchive()
 
 	archive.AddFile(tempfile1.Name())
 	archive.AddFile(tempfile2.Name())

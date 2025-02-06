@@ -34,7 +34,7 @@ func (a *Archive) AddFile(path string) {
 
 // Sets compression level
 func (a *Archive) SetCompression(lvl CompressionLevel) {
-	a.compression = CompressionLevel(lvl)
+	a.compression = lvl
 }
 
 // Sets volumes sizes
@@ -76,9 +76,6 @@ func (a *Archive) Stream(keepAfterReturn bool) (*os.File, error) {
 // Returns concatinated destination direactory and file name.
 // If file name is empty, return "./" as current directory.
 func (a *Archive) filename() string {
-	if a.destinationDir == "" {
-		a.destinationDir = "."
-	}
 	return fmt.Sprintf("%s/%s.rar", a.destinationDir, a.name)
 }
 
@@ -90,8 +87,8 @@ func (a *Archive) buildargs() (args []string, tempfile string, err error) {
 		args = append(args, "-s")
 	}
 
-	if a.compression != CompressionLVL3 {
-		args = append(args, fmt.Sprintf("-m%d", a.compression))
+	if a.compression != NoneCompression {
+		args = append(args, a.compression.String())
 	}
 
 	if a.volumes != "" {
