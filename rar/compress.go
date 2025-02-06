@@ -117,6 +117,7 @@ func (a *Archive) source() (source []string, tempfile string, err error) {
 	}
 	if a.filePattern != "" {
 		source = append(source, a.filePattern)
+		return
 	}
 
 	tempfile, err = createFilesList(a.files)
