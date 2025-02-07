@@ -91,7 +91,7 @@ func NewArchiveWithConfig(config ArchiveConfig) *Archive {
 	}
 
 	if config.DestinationDir != "" {
-		archive.name = config.Name
+		archive.destinationDir = config.DestinationDir
 	}
 
 	archive.solid = config.Solid

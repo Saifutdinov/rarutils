@@ -127,11 +127,13 @@ func (a *Archive) source() (source []string, tempfile string, err error) {
 
 	}
 
-	tempfile, err = createFilesList(a.files)
-	if err != nil {
-		return
+	if a.filePattern == "" && len(a.files) > 0 {
+		tempfile, err = createFilesList(a.files)
+		if err != nil {
+			return
+		}
+		source = append(source, "@"+tempfile)
 	}
-	source = append(source, "@"+tempfile)
 	return
 }
 
