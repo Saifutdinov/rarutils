@@ -1,6 +1,7 @@
 package rar
 
 type (
+	Encoding         string
 	CompressionLevel string
 	ExcludePathFlag  string
 
@@ -25,6 +26,8 @@ type (
 		password string
 		// exludes or includes path of files
 		excludePath ExcludePathFlag
+		// charater set for filenames -scUTF-8
+		encoding Encoding
 	}
 
 	ArchiveConfig struct {
@@ -38,6 +41,7 @@ type (
 		Volumes        string
 		Password       string
 		ExcludePath    ExcludePathFlag
+		Encoding       Encoding
 	}
 )
 
@@ -61,6 +65,10 @@ const (
 	ExcludePathFull ExcludePathFlag = "-ep3"
 )
 
+const (
+	UTF8 Encoding = "UTF-8"
+)
+
 const filesListFileName = "rarfileslist*"
 
 var (
@@ -75,6 +83,7 @@ var (
 		Volumes:        "",
 		Password:       "",
 		ExcludePath:    NotExcludePath,
+		Encoding:       "",
 	}
 )
 

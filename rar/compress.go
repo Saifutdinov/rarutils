@@ -52,8 +52,12 @@ func (a *Archive) ToggleSolid(solid bool) {
 	a.solid = solid
 }
 
-func (a *Archive) ExcludePath(total string) {
+func (a *Archive) ExcludePath(extype ExcludePathFlag) {
+	a.excludePath = extype
+}
 
+func (a *Archive) SetEncoding(encoding Encoding) {
+	a.encoding = encoding
 }
 
 // Compress your source to rar file to path
@@ -86,7 +90,12 @@ func (a *Archive) filename() string {
 // Builds and returns arguments to call rar utility.
 // Also returns temp file for source, to use and delete after that.
 func (a *Archive) buildargs() (args []string, tempfile string, err error) {
-	args = append(args, "a", a.filename())
+	args = append(args, "a")
+
+	if a.password != "" {
+		args = append(args, "-p"+a.password)
+	}
+
 	if a.solid {
 		args = append(args, "-s")
 	}
@@ -99,20 +108,21 @@ func (a *Archive) buildargs() (args []string, tempfile string, err error) {
 		args = append(args, string(a.excludePath))
 	}
 
+	if a.encoding != "" {
+		args = append(args, "-sc"+string(a.encoding))
+	}
+
 	if a.volumes != "" {
 		args = append(args, "-v"+a.volumes)
 	}
+
+	args = append(args, a.filename())
 
 	source, tempfile, err := a.source()
 	if err != nil {
 		return
 	}
 	args = append(args, source...)
-
-	if a.password != "" {
-		args = append(args, "-p"+a.password)
-	}
-
 	return
 }
 
