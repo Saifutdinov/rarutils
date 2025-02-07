@@ -67,7 +67,11 @@ const (
 
 const (
 	DefaultEncoding Encoding = ""
-	UTF8            Encoding = "UTF-8"
+	UTF16Encoding   Encoding = "u"
+	UTF8Encoding    Encoding = "f"
+	ANSIEncoding    Encoding = "a" // windows only
+	DOSEncoding     Encoding = "o" // windows only
+
 )
 
 const filesListFileName = "rarfileslist*"
