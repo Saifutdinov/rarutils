@@ -66,7 +66,8 @@ const (
 )
 
 const (
-	UTF8 Encoding = "UTF-8"
+	DefaultEncoding Encoding = ""
+	UTF8            Encoding = "UTF-8"
 )
 
 const filesListFileName = "rarfileslist*"
@@ -83,7 +84,7 @@ var (
 		Volumes:        "",
 		Password:       "",
 		ExcludePath:    NotExcludePath,
-		Encoding:       "",
+		Encoding:       DefaultEncoding,
 	}
 )
 
@@ -131,6 +132,10 @@ func NewArchiveWithConfig(config ArchiveConfig) *Archive {
 
 	if config.ExcludePath != NotExcludePath {
 		archive.excludePath = config.ExcludePath
+	}
+
+	if config.Encoding != DefaultEncoding {
+		archive.encoding = config.Encoding
 	}
 
 	return archive

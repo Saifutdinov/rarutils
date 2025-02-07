@@ -108,7 +108,7 @@ func (a *Archive) buildargs() (args []string, tempfile string, err error) {
 		args = append(args, string(a.excludePath))
 	}
 
-	if a.encoding != "" {
+	if a.encoding != DefaultEncoding {
 		args = append(args, "-sc"+string(a.encoding))
 	}
 
