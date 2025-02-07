@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	tempArchivefileName = "ArchiveName"
+	tempArchivefileName = "rar-arcive"
 	tempArchivefilePath = tempArchivefileName + ".rar"
 	tmpfile1            = "tempfile1.pdf"
 	tmpfile2            = "tempfile2.pdf"
@@ -28,22 +28,28 @@ func TestCompress(t *testing.T) {
 		t.Error(err)
 	}
 
+	rarutils.ShowDebugLogs(true)
 	rarutils.SetRarPath("/opt/homebrew/bin/rar")
 
-	archive := rar.NewArchive()
-
-	archive.AddFile(tempfile1.Name())
-	archive.AddFile(tempfile2.Name())
-
-	archive.SetCompression(rar.CompressionLVL5)
-	archive.ToggleSolid(true)
+	archive := rar.NewArchiveWithConfig(rar.ArchiveConfig{
+		FilePattern:    "../examples/files/example_pdf_*.pdf",
+		Name:           tempArchivefileName,
+		Files:          []string{tempfile1.Name(), tempfile2.Name()},
+		Encoding:       rar.UTF8Encoding,
+		Solid:          true,
+		DestinationDir: "../examples/archives",
+		ExcludePath:    rar.ExcludeBasePath,
+		// Compression: rar.CompressionLVL3,
+	})
 
 	if err = archive.Compress(); err != nil {
 		t.Error(err)
 	}
 
+	t.Log(tempArchivefilePath)
+
 	// Проверяем, что архив создан
-	if _, err := os.Stat(tempArchivefilePath); os.IsNotExist(err) {
+	if _, err := os.Stat("../examples/archives/rar-arcive.rar"); os.IsNotExist(err) {
 		t.Errorf("Archive file was not created")
 	}
 }
