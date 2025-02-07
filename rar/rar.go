@@ -2,6 +2,7 @@ package rar
 
 type (
 	CompressionLevel string
+	ExcludePathFlag  string
 
 	Archive struct {
 		// how to name file. No ".rar" needed in the end.
@@ -22,33 +23,23 @@ type (
 		volumes string
 		// password
 		password string
+		// exludes or includes path of files
+		excludePath ExcludePathFlag
 	}
 
 	ArchiveConfig struct {
-		// how to name file. No ".rar" needed in the end.
-		Name string
-		// where save file
+		Name           string
 		DestinationDir string
-		// save as solid
-		Solid bool
-		//Directory of files. Example - /path/to/directory
-		SourceDir string
-		//File pattern of files. Example - /path/to/files/*.pdf
-		FilePattern string
-		// List of file paths. Example - [/path/to/file1.pdf, /path/to/file2.pdf, /path/to/file3.pdf, ...]
-		Files []string
-		// compression. Example - m0 - m5. Default empty.
-		Compression CompressionLevel
-		// volumes. Example - v10MB. Default empty.
-		Volumes string
-		// password
-		Password string
+		Solid          bool
+		SourceDir      string
+		FilePattern    string
+		Files          []string
+		Compression    CompressionLevel
+		Volumes        string
+		Password       string
+		ExcludePath    ExcludePathFlag
 	}
 )
-
-func (cl CompressionLevel) String() string {
-	return string(cl)
-}
 
 const (
 	// store
@@ -61,9 +52,16 @@ const (
 	CompressionLVL4 CompressionLevel = "-m4"
 	// maximal
 	CompressionLVL5 CompressionLevel = "-m5"
-
-	filesListFileName = "rarfileslist*"
 )
+
+const (
+	NotExcludePath  ExcludePathFlag = ""
+	ExcludePath     ExcludePathFlag = "-ep"
+	ExcludeBasePath ExcludePathFlag = "-ep1"
+	ExcludePathFull ExcludePathFlag = "-ep3"
+)
+
+const filesListFileName = "rarfileslist*"
 
 var (
 	DefaultArchiveConfig = ArchiveConfig{
@@ -76,6 +74,7 @@ var (
 		Compression:    CompressionLVL3,
 		Volumes:        "",
 		Password:       "",
+		ExcludePath:    NotExcludePath,
 	}
 )
 
@@ -119,6 +118,10 @@ func NewArchiveWithConfig(config ArchiveConfig) *Archive {
 
 	if config.Password != "" {
 		archive.password = config.Password
+	}
+
+	if config.ExcludePath != NotExcludePath {
+		archive.excludePath = config.ExcludePath
 	}
 
 	return archive

@@ -52,6 +52,10 @@ func (a *Archive) ToggleSolid(solid bool) {
 	a.solid = solid
 }
 
+func (a *Archive) ExcludePath(total string) {
+
+}
+
 // Compress your source to rar file to path
 func (a *Archive) Compress() error {
 	return a.savefile()
@@ -88,20 +92,27 @@ func (a *Archive) buildargs() (args []string, tempfile string, err error) {
 	}
 
 	if a.compression != NoneCompression {
-		args = append(args, a.compression.String())
+		args = append(args, string(a.compression))
+	}
+
+	if a.excludePath != NotExcludePath {
+		args = append(args, string(a.excludePath))
 	}
 
 	if a.volumes != "" {
 		args = append(args, "-v"+a.volumes)
 	}
+
 	source, tempfile, err := a.source()
 	if err != nil {
 		return
 	}
 	args = append(args, source...)
+
 	if a.password != "" {
 		args = append(args, "-p"+a.password)
 	}
+
 	return
 }
 
@@ -110,11 +121,10 @@ func (a *Archive) buildargs() (args []string, tempfile string, err error) {
 func (a *Archive) source() (source []string, tempfile string, err error) {
 	if a.sourceDir != "" {
 		source = append(source, "-r", a.sourceDir)
-		return
 	}
 	if a.filePattern != "" {
 		source = append(source, a.filePattern)
-		return
+
 	}
 
 	tempfile, err = createFilesList(a.files)
@@ -130,6 +140,10 @@ func (a *Archive) savefile() error {
 	args, tempfile, err := a.buildargs()
 	if err != nil {
 		return err
+	}
+
+	if rarutils.ShowLogs {
+		fmt.Println(rarutils.RarExeDefaultPath, strings.Join(args, " "))
 	}
 
 	_, err = cmd.Call(rarutils.RarExeDefaultPath, args)
