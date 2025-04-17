@@ -1,0 +1,26 @@
+- Добавь возможность создать архив WithConfig чтобы задать параметры файла заранее
+
+-- 05.02.2025, 19:07
+
+Тестирование 1.
+; var (
+;     path    = fmt.Sprintf("uploads/%d/results", supersetId)
+;     pattern = fmt.Sprintf("%s/%s_360_spec*.pdf", path, langId)
+; )
+; const fname = "spec-reports"
+; archive := rar.NewArchive(fname)
+; archive.SetDestinationDir(path)
+; archive.ToggleSolid(true)
+; archive.SetFilePattern(pattern)
+; if err := archive.Compress(); err != nil {
+;     return nil, cerror.Decorate(err)
+; }
+Видно на примере, что параметры, некоторые, включены всегда
+
+- Расммотри разные варианты как отдать Stream
+
+Тестирование 1. 
+
+Оказалось, что стрим иногда удобнее как `*os.File` ???
+
+- Добавить encoding как экспортируемые константы

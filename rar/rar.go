@@ -5,43 +5,94 @@ type (
 	CompressionLevel string
 	ExcludePathFlag  string
 
-	Archive struct {
+	ArchiveFile struct {
 		// how to name file. No ".rar" needed in the end.
 		name string
 		// where save file
 		destinationDir string
-		// save as solid
-		solid bool
 		//Directory of files. Example - /path/to/directory
 		sourceDir string
 		//File pattern of files. Example - /path/to/files/*.pdf
 		filePattern string
-		// List of file paths. Example - [/path/to/file1.pdf, /path/to/file2.pdf, /path/to/file3.pdf, ...]
-		files []string
-		// compression. Example - m0 - m5. Default empty.
-		compression CompressionLevel
-		// volumes. Example - v10MB. Default empty.
+		// volumes. Example - v10MB.
 		volumes string
 		// password
 		password string
+		// -z<file>
+		comment string
+		// List of file paths. Example - [/path/to/file1.pdf, /path/to/file2.pdf, /path/to/file3.pdf, ...]
+		files []string
+		// compression. Example - m0 - m5.
+		compression CompressionLevel
 		// exludes or includes path of files
 		excludePath ExcludePathFlag
 		// charater set for filenames -scUTF-8
 		encoding Encoding
+		// save as solid
+		solid bool
+		// save recursive all directories
+		recursive bool
+		// stores recovery file (3%)
+		recover bool
+		// delete files after all
+		deleteFiles bool
+		// keep broken files
+		keepBroken bool
+		//
+		timestamp bool
+		//
+		av bool
+
+		ignoreAttributes bool
+
+		multithreaded bool
+
+		disableLock bool
 	}
 
 	ArchiveConfig struct {
-		Name           string
+		// archivename.rar (default: "rar-archive")
+		Name string
+		// /path/to/store/archive (default:".")
 		DestinationDir string
-		Solid          bool
-		SourceDir      string
-		FilePattern    string
-		Files          []string
-		Compression    CompressionLevel
-		Volumes        string
-		Password       string
-		ExcludePath    ExcludePathFlag
-		Encoding       Encoding
+		// /path/to/compress (default:".")
+		SourceDir string
+		// file*.pdf (default: "*.*")
+		FilePattern string
+		// -v<size> (default: "10m")
+		VolumeSize string
+		// -p[secretpass]
+		Password string
+		// -z<file> - text from <file> as comment
+		CommentFile string
+		// /path/to/file
+		Files []string
+		// -sc[encoding] (defualt: "")
+		Encoding Encoding
+		// -m[0-5] (default: CompressionLVL3)
+		Compression CompressionLevel
+		// -ep (default: false)
+		ExcludePath ExcludePathFlag
+		// -s: solid archive (default: false)
+		Solid bool
+		// -r (default: false)
+		Recursive bool
+		// -rr (defualt: false)
+		RecoveryRecord bool
+		// -df (defualt: false) - USE CAREFULLY!
+		DeleteFiles bool
+		// -kb (defualt: false)
+		KeepBroken bool
+		// -ts (defualt: true)
+		TimeStamp bool
+		// -av checked with antivirus (defualt: false)
+		AV bool
+		// -ac ignore files attributes (like "archived") for reserve
+		IgnoreAttributes bool
+		// -mt Use thtreads to compress.
+		Multithreaded bool
+		// -ds Disable reading lock (USE CAREFULLY!)
+		DisableLock bool
 	}
 )
 
@@ -74,8 +125,6 @@ const (
 
 )
 
-const filesListFileName = "rarfileslist*"
-
 var (
 	DefaultArchiveConfig = ArchiveConfig{
 		Name:           "rar-archive",
@@ -85,7 +134,7 @@ var (
 		FilePattern:    "*.*",
 		Files:          []string{},
 		Compression:    CompressionLVL3,
-		Volumes:        "",
+		VolumeSize:     "10m",
 		Password:       "",
 		ExcludePath:    NotExcludePath,
 		Encoding:       DefaultEncoding,
@@ -93,13 +142,14 @@ var (
 )
 
 // Returns new Archive struct with name. Name should be without ".rar" extension
-func NewArchive() *Archive {
+func NewArchive() *ArchiveFile {
 	return NewArchiveWithConfig(DefaultArchiveConfig)
 }
 
-func NewArchiveWithConfig(config ArchiveConfig) *Archive {
-	archive := new(Archive)
+func NewArchiveWithConfig(config ArchiveConfig) *ArchiveFile {
+	archive := new(ArchiveFile)
 
+	// string params
 	if config.Name != "" {
 		archive.name = config.Name
 	}
@@ -107,8 +157,6 @@ func NewArchiveWithConfig(config ArchiveConfig) *Archive {
 	if config.DestinationDir != "" {
 		archive.destinationDir = config.DestinationDir
 	}
-
-	archive.solid = config.Solid
 
 	if config.SourceDir != "" {
 		archive.sourceDir = config.SourceDir
@@ -118,22 +166,19 @@ func NewArchiveWithConfig(config ArchiveConfig) *Archive {
 		archive.filePattern = config.FilePattern
 	}
 
-	if len(config.Files) > 0 {
-		archive.files = config.Files
-	}
-
-	if config.Compression != NoneCompression {
-		archive.compression = config.Compression
-	}
-
-	if config.Volumes != "" {
-		archive.volumes = config.Volumes
+	if config.VolumeSize != "" {
+		archive.volumes = config.VolumeSize
 	}
 
 	if config.Password != "" {
 		archive.password = config.Password
 	}
 
+	if config.CommentFile != "" {
+		archive.comment = config.CommentFile
+	}
+
+	// const params
 	if config.ExcludePath != NotExcludePath {
 		archive.excludePath = config.ExcludePath
 	}
@@ -141,6 +186,27 @@ func NewArchiveWithConfig(config ArchiveConfig) *Archive {
 	if config.Encoding != DefaultEncoding {
 		archive.encoding = config.Encoding
 	}
+
+	if config.Compression != NoneCompression {
+		archive.compression = config.Compression
+	}
+
+	// slice
+	if len(config.Files) > 0 {
+		archive.files = config.Files
+	}
+
+	// bool
+	archive.solid = config.Solid
+	archive.recursive = config.Recursive
+	archive.recover = config.RecoveryRecord
+	archive.deleteFiles = config.DeleteFiles
+	archive.keepBroken = config.KeepBroken
+	archive.timestamp = config.TimeStamp
+	archive.av = config.AV
+	archive.ignoreAttributes = config.IgnoreAttributes
+	archive.multithreaded = config.Multithreaded
+	archive.disableLock = config.DisableLock
 
 	return archive
 }
